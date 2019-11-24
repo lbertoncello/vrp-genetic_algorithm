@@ -137,20 +137,6 @@ class Individuo():
     def crossover(self, outro_individuo, geracao):
         filhos = [self.gera_filho1(outro_individuo, geracao),
                   self.gera_filho2(outro_individuo, geracao)]
-
-
-            # filho1 = np.concatenate((parte1, parte2))
-                    
-            # parte1 = outro_individuo.cromossomo[j][:corte]
-            # parte2 = self.cromossomo[j]
-            
-            # idx = sorted([np.where(parte2 == i) for i in list(set(parte2) - set(parte1))])
-            # parte2 = np.array([parte2[i[0][0]] for i in idx])
-            
-            # filho2 = np.concatenate((parte1, parte2))
-
-            # filhos[0].cromossomo[j] = filho1
-            # filhos[1].cromossomo[j] = filho2
         
         return filhos
     
