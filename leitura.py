@@ -48,9 +48,18 @@ def leEntradaVRP(nomeArquivo):
         vrp.set_capacity(capacity)
 
         for i in range(dimension):
-            linha = linhas[7 + i].strip().split(' ')
-            vrp.append_node(np.array([float(linha[1]), float(linha[2])]))
-            # print(np.array([float(linha[1]), float(linha[2])]))
+            linha = linhas[7 + i].replace('\n', '').strip().split(' ')
+
+            indice_primeiro_elemento = 1
+            while linha[indice_primeiro_elemento] == '' or linha[indice_primeiro_elemento] == ' ':
+                indice_primeiro_elemento += 1
+
+            indice_segundo_elemento = indice_primeiro_elemento + 1
+            while linha[indice_segundo_elemento] == '' or linha[indice_segundo_elemento] == ' ':
+                indice_segundo_elemento += 1
+
+            vrp.append_node(np.array([float(linha[indice_primeiro_elemento]), float(linha[indice_segundo_elemento])]))
+            # 
 
         for i in range(dimension):
             linha = linhas[8 + dimension + i].strip().split(' ')

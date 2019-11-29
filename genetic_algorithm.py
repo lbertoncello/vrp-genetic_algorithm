@@ -41,13 +41,11 @@ class Individuo():
         soma_pesos_caminhao = 0
 
         for j in range(len(self.cromossomo[i])):
-            # print(self.pesos[self.cromossomo[i][j]])
             soma_pesos_caminhao += self.pesos[self.cromossomo[i][j]]
 
         return soma_pesos_caminhao
 
     def pode_levar_carga(self, i, peso_carga):
-        # print(self.capacidade_ocupada(i) + peso_carga)
         if self.capacidade_ocupada(i) + peso_carga <= self.capacidade:
             return True
 
@@ -57,7 +55,6 @@ class Individuo():
         soma_pesos_caminhao = 0
 
         for j in range(len(self.cromossomo[indice_caminhao_origem])):
-            # print(self.pesos[self.cromossomo[i][j]])
             soma_pesos_caminhao += self.pesos[self.cromossomo[indice_caminhao_origem][j]]
 
         soma_pesos_caminhao -= self.pesos[indice_carga_removida]
@@ -66,7 +63,6 @@ class Individuo():
             soma_pesos_caminhao = 0
 
             for j in range(len(self.cromossomo[indice_caminhao_destino])):
-                # print(self.pesos[self.cromossomo[i][j]])
                 soma_pesos_caminhao += self.pesos[self.cromossomo[indice_caminhao_destino][j]]
 
             soma_pesos_caminhao -= self.pesos[indice_nova_carga]
@@ -101,8 +97,6 @@ class Individuo():
                     destino = self.coordenadas[self.cromossomo[i][j+1]]
 
                     soma_pesos_caminhao += distance.euclidean(origem, destino)
-                    # soma_pesos_caminhao += math.trunc(distance.euclidean(origem, destino))
-                    # soma_pesos_caminhao += self.pesos[self.cromossomo[i][j]][self.cromossomo[i][j+1]]
 
                 origem = self.coordenadas[self.cromossomo[i][len(self.cromossomo[i]) - 1]]
                 destino = self.coordenadas[0]
@@ -111,8 +105,6 @@ class Individuo():
                 soma_pesos_rota += math.trunc(soma_pesos_caminhao)
             
         self.custo_rota = soma_pesos_rota
-        #Divido 1 pela distância pra ser a nota, já que quanto maior a distancia,
-        #menor a nota
         self.nota_avaliacao = 1 / soma_pesos_rota
 
     def gera_filho(self, geracao, parte1, parte2):
@@ -129,94 +121,83 @@ class Individuo():
                     else:
                         indice_cromossomo_aleatorio = np.random.randint(len(filho.cromossomo))
 
+                        tentativas = 0
                         while indice_cromossomo_aleatorio == j or filho.pode_levar_carga(indice_cromossomo_aleatorio, self.pesos[indice]) == False:
                             indice_cromossomo_aleatorio = np.random.randint(len(filho.cromossomo))
+                            tentativas += 1
+
+                            if tentativas == 50:
+                                return False
 
                         filho.cromossomo[indice_cromossomo_aleatorio] = np.append(filho.cromossomo[indice_cromossomo_aleatorio], indice)
 
         return filho
 
     def gera_filho1(self, outro_individuo, geracao):
-        parte1 = []
-        parte2 = []
+        filho = False
 
-        for j in range(len(self.cromossomo)):
-            # corte = round(rnd.random() * len(self.cromossomo[j]))
-            if len(self.cromossomo[j]) > 0:
-                corte = np.random.randint(len(self.cromossomo[j]))
-            else:
-                corte = 0
+        while filho == False:
+            parte1 = []
+            parte2 = []
 
-            parte1.append(self.cromossomo[j][:corte])
-            parte2.append(outro_individuo.cromossomo[j])
+            for j in range(len(self.cromossomo)):
+                if len(self.cromossomo[j]) > 0:
+                    corte = np.random.randint(len(self.cromossomo[j]))
+                else:
+                    corte = 0
 
-            # print('corte')
-            # print(corte)
-            # print('parte 1')
-            # print(parte1[j])
-            # print('parte 2')
-            # print(parte2[j])
-            # print('menos')
-            # print(list(set(parte2[j]) - set(parte1[j]) ))
-            idx = sorted([np.where(parte2[j] == i) for i in list(set(parte2[j]) - set(parte1[j]) ) ])
-            parte2[j] = np.array([parte2[j][i[0][0]] for i in idx])
+                parte1.append(self.cromossomo[j][:corte])
+                parte2.append(outro_individuo.cromossomo[j])
 
-        return self.gera_filho(geracao, parte1, parte2)
+                idx = sorted([np.where(parte2[j] == i) for i in list(set(parte2[j]) - set(parte1[j]) ) ])
+                parte2[j] = np.array([parte2[j][i[0][0]] for i in idx])
+
+            filho = self.gera_filho(geracao, parte1, parte2)
+            
+        return filho
+
 
     def gera_filho2(self, outro_individuo, geracao):
-        parte1 = []
-        parte2 = []
+        filho = False
 
-        for j in range(len(self.cromossomo)):
-            # corte = round(rnd.random() * len(self.cromossomo[j]))
-            if len(self.cromossomo[j]) > 0:
-                corte = np.random.randint(len(self.cromossomo[j]))
-            else:
-                corte = 0
-                    
-            parte1.append(outro_individuo.cromossomo[j][:corte])
-            parte2.append(self.cromossomo[j])
+        while filho == False:
+            parte1 = []
+            parte2 = []
 
-            # print('corte')
-            # print(corte)
-            # print('parte 1')
-            # print(parte1[j])
-            # print('parte 2')
-            # print(parte2[j])
-            # print('menos')
-            # print(list(set(parte2[j]) - set(parte1[j]) ))
-            idx = sorted([np.where(parte2[j] == i) for i in list(set(parte2[j]) - set(parte1[j])  )])
-            parte2[j] = np.array([parte2[j][i[0][0]] for i in idx])
+            for j in range(len(self.cromossomo)):
+                if len(self.cromossomo[j]) > 0:
+                    corte = np.random.randint(len(self.cromossomo[j]))
+                else:
+                    corte = 0
+                        
+                parte1.append(outro_individuo.cromossomo[j][:corte])
+                parte2.append(self.cromossomo[j])
 
-        return self.gera_filho(geracao, parte1, parte2)
+                idx = sorted([np.where(parte2[j] == i) for i in list(set(parte2[j]) - set(parte1[j])  )])
+                parte2[j] = np.array([parte2[j][i[0][0]] for i in idx])
 
-    #Algoritmo usado: Ordered Crossover
+            filho = self.gera_filho(geracao, parte1, parte2)
+            
+        return filho
+
     def crossover(self, outro_individuo, geracao):
         filhos = [self.gera_filho1(outro_individuo, geracao),
                   self.gera_filho2(outro_individuo, geracao)]
         
         return filhos
     
-    #Função que pode modificar cada gene. O gene só será modificado se o valor 
-    #gerado aleatóriamente for maior que a taxa de mutação.
-    #Se ocorrer mutação, troca a posição de 2 genes
     def mutacao(self, taxa_mutacao):      
-        #Não pode haver mutação no vértice inicial       
         chance_mutacao = taxa_mutacao * len(self.coordenadas) * rnd.random()
         
         if rnd.random() < chance_mutacao:
             qtd_cromossomos_mutados = round(taxa_mutacao * len(self.coordenadas))
-            # print(str(qtd_cromossomos_mutados) + ' mutacoes!')
             
             for _ in range(qtd_cromossomos_mutados):
-                #-1 pra ignorar a primeira posicao e -1 já que começa de 0 e +1 para ignorar
-                #a posicao 0
                 indice_caminhao_origem = np.random.randint(len(self.cromossomo))
 
                 while len(self.cromossomo[indice_caminhao_origem]) == 0:
                     indice_caminhao_origem = np.random.randint(len(self.cromossomo))
 
-                # posicao1 = round(rnd.random() * (len(self.cromossomo[indice_caminhao_origem]) - 2)) + 1
                 posicao1 = np.random.randint(len(self.cromossomo[indice_caminhao_origem]))
 
                 indice_caminhao_destino = np.random.randint(len(self.cromossomo))
@@ -224,50 +205,35 @@ class Individuo():
                 while len(self.cromossomo[indice_caminhao_destino]) == 0:
                     indice_caminhao_destino = np.random.randint(len(self.cromossomo))
 
-                # posicao2 = round(rnd.random() * (len(self.cromossomo[indice_caminhao_destino]) - 2)) + 1
                 posicao2 = np.random.randint(len(self.cromossomo[indice_caminhao_destino])) 
 
-                # print(self.cromossomo[indice_caminhao_origem])
-                # print(posicao1)
-                # print(self.cromossomo[indice_caminhao_destino])
-                # print(posicao2)
-
-                num_tentativas = 0
+                tentativas = 0
                 while self.pode_realizar_troca(indice_caminhao_origem, indice_caminhao_destino, self.cromossomo[indice_caminhao_origem][posicao1], self.cromossomo[indice_caminhao_destino][posicao2]) == False:
                     indice_caminhao_destino = np.random.randint(len(self.cromossomo))
 
                     while len(self.cromossomo[indice_caminhao_destino]) == 0:
                         indice_caminhao_destino = np.random.randint(len(self.cromossomo))
 
-                    # posicao2 = round(rnd.random() * (len(self.cromossomo[indice_caminhao_destino]) - 2)) + 1
                     posicao2 = np.random.randint(len(self.cromossomo[indice_caminhao_destino])) 
-                    num_tentativas += 1
 
-                    if num_tentativas > 50:
-                        print('AGARRADO')
+                    indice_caminhao_origem = np.random.randint(len(self.cromossomo))
+
+                    while len(self.cromossomo[indice_caminhao_origem]) == 0:
                         indice_caminhao_origem = np.random.randint(len(self.cromossomo))
-
-                        while len(self.cromossomo[indice_caminhao_origem]) == 0:
-                            indice_caminhao_origem = np.random.randint(len(self.cromossomo))
-                        # posicao1 = round(rnd.random() * (len(self.cromossomo[indice_caminhao_origem]) - 2)) + 1
-                        posicao1 = np.random.randint(len(self.cromossomo[indice_caminhao_origem]))
-                        num_tentativas = 0
-
-                    # print(self.cromossomo[indice_caminhao_origem])
-                    # print(posicao1)
-                    # print(self.cromossomo[indice_caminhao_destino])
-                    # print(posicao2)
+                    posicao1 = np.random.randint(len(self.cromossomo[indice_caminhao_origem]))
                     
+                    tentativas += 1
+
+                    if tentativas == 75:
+                        break
                 
-                temp = self.cromossomo[indice_caminhao_origem][posicao1]
-                self.cromossomo[indice_caminhao_origem][posicao1] = self.cromossomo[indice_caminhao_destino][posicao2]
-                self.cromossomo[indice_caminhao_destino][posicao2] = temp
+                if tentativas < 75:
+                    temp = self.cromossomo[indice_caminhao_origem][posicao1]
+                    self.cromossomo[indice_caminhao_origem][posicao1] = self.cromossomo[indice_caminhao_destino][posicao2]
+                    self.cromossomo[indice_caminhao_destino][posicao2] = temp
                 
         return self
     
-#Classe que vai gerenciar todo o procedimento do algoritmo genetico. Acredito 
-#que a única coisa que vai precisar mudar nela é a função que inicializa a 
-#população.
 class AlgoritmoGenetico():
     def __init__(self, tamanho_populacao):
         self.tamanho_populacao = tamanho_populacao
@@ -297,55 +263,37 @@ class AlgoritmoGenetico():
         return indices_escolhidos
 
         
-    #Temos que adaptar os parâmetros recebidos para os usados em nosso problema.
     def inicializa_populacao(self, coordenadas, pesos, capacidade, numero_caminhoes):
-        for i in range(self.tamanho_populacao):
+        i = 0
+        while i < self.tamanho_populacao:
             self.populacao.append(Individuo(coordenadas, pesos, capacidade, numero_caminhoes))
             lista_indices = list(range(1, len(coordenadas)))
-
-            # for j in range(numero_caminhoes):
-            #     self.populacao[i].cromossomo.append(np.array([], dtype=int))
+            deu_problema = False
 
             while len(lista_indices) > 0:
                 posicao = np.random.randint(len(lista_indices)) 
                 j = np.random.randint(numero_caminhoes)
 
-                # k = 0
+                tentativas = 0
                 while self.populacao[i].pode_levar_carga(j, pesos[posicao]) == False:
                     j = np.random.randint(numero_caminhoes)
 
-                    # if k == 20:
-                    #     print('AGARRADO')
-                    #     print(self.populacao[i].cromossomo)
-                    #     print('-------')
-                    # k += 1
+                    tentativas += 1
 
-                self.populacao[i].cromossomo[j] = np.append(self.populacao[i].cromossomo[j], lista_indices[posicao])
-                lista_indices.pop(posicao)
+                    if tentativas == 75:
+                        deu_problema = True
+                        break
 
-                    # rnd.shuffle(self.populacao[i].cromossomo[i])
-            
-            # for j in range(len(self.populacao[i].cromossomo)):
-            #     print('OI')
-            #     self.populacao[i].cromossomo[j] = np.append(self.populacao[i].cromossomo[j], 0)
-            #     print(self.populacao[i].cromossomo[j])
-            
-            #Colocar o vértice inicial na posição 0
-            # for j in range(len(self.populacao[i].cromossomo)):
-            #     if self.populacao[i].cromossomo[j] == indice_vertice_inicial:
-            #         temp = self.populacao[i].cromossomo[0]
-            #         self.populacao[i].cromossomo[0] = indice_vertice_inicial
-            #         self.populacao[i].cromossomo[j] = temp
-                    
-            #         break
+                if deu_problema == False:
+                    self.populacao[i].cromossomo[j] = np.append(self.populacao[i].cromossomo[j], lista_indices[posicao])
+                    lista_indices.pop(posicao)
+                else:
+                    break
 
-            # soma = 0
-            # for k in range(len(self.populacao[i].cromossomo)):
-            #     soma += len(self.populacao[i].cromossomo[k])
-
-            # print(soma)
-            # print(self.populacao[i].cromossomo)
-            # print('-------')
+            if deu_problema == False:
+                i += 1
+            else:
+                self.populacao.pop()
             
         self.melhor_solucao = self.populacao[0]
         
@@ -358,11 +306,6 @@ class AlgoritmoGenetico():
         if individuo.nota_avaliacao > self.melhor_solucao.nota_avaliacao:
             self.melhor_solucao = individuo
 
-            # for i in range(len(individuo.cromossomo)):
-            #     print(individuo.capacidade_ocupada(i))
-            
-    #Soma as avaliações dos individuos da geração. É necessária na hora de 
-    #selecionar o pai.
     def soma_avaliacoes(self):
         soma = 0
         
@@ -404,15 +347,10 @@ class AlgoritmoGenetico():
         self.melhor_solucao = self.populacao[0]
         self.lista_solucoes.append(self.melhor_solucao.custo_rota)
 
-        print('-----MELHOR-----')
         print(self.melhor_solucao.custo_rota)
-
-        #self.visualiza_geracao()
-
         self.geracao += 1
         
         for geracao in range(numero_geracoes):
-            #soma_avaliacao = self.soma_avaliacoes()
             nova_populacao = []
              
             for individuos_gerados in range(0, self.tamanho_populacao, 2):                 
@@ -421,19 +359,16 @@ class AlgoritmoGenetico():
                 
                 while pai1 == pai2:
                     pai2 = self.seleciona_pai(self.soma_avaliacao)                    
-                
+
                 filhos = self.populacao[pai1].crossover(self.populacao[pai2], self.geracao)
-                                
+
                 nova_populacao.append(filhos[0].mutacao(taxa_mutacao))
-                nova_populacao.append(filhos[1].mutacao(taxa_mutacao))
-                # nova_populacao.append(filhos[0])
-                # nova_populacao.append(filhos[1])            
+                nova_populacao.append(filhos[1].mutacao(taxa_mutacao))     
                 
             individuos_mantidos = self.populacao[:round(self.tamanho_populacao * 0.10)]
                 
             self.populacao = list(nova_populacao) + individuos_mantidos
             
-            #print("Soma avaliacao: %s" % self.soma_avaliacao)
             self.soma_avaliacao = 0
             
             for individuo in self.populacao:
@@ -452,8 +387,6 @@ class AlgoritmoGenetico():
             melhor = self.populacao[0]
             self.lista_solucoes.append(melhor.custo_rota)
             self.melhor_individuo(melhor)
-            
-            #print("Proximo ciclo")
             
         self.visualiza_geracao()
         print("Cromossomo: %s" % self.melhor_solucao.cromossomo)
@@ -485,15 +418,7 @@ def escreve_resultado(pasta, arquivo_entrada, media_resultados, melhor_resultado
     escreve_saida_txt(nome_saida_txt, media_resultados, melhor_resultado, pior_resultado, desvio_padrao, media_tempo)
 
 
-#Apenas cria a lista de produtos que serão usados, chama a função que executa
-#o algoritmo genético, printa o resultado e printa o gráfico.
 if __name__ == '__main__':
-    #agrv[1]: caminho dados
-    #argv[2]: ponto x V_inicial
-    #argv[3]: ponto y V_inicial
-    #argv[4]: tamanho pop
-    #argv[5]: tx mutacao
-    #argv[6]: num geracoes
     entrada = sys.argv[1]
     tamanho_populacao = int(sys.argv[2])
     taxa_mutacao = float(sys.argv[3])
@@ -501,14 +426,7 @@ if __name__ == '__main__':
     numero_execucoes = int(sys.argv[5])
     pasta = sys.argv[6]
     
-    print('Entrada: ' + entrada)
-
     vrp = leEntradaVRP(entrada)
-    
-    # entrada = "a280.tsp"
-    # tamanho_populacao = 100
-    # taxa_mutacao = 0.40
-    # numero_geracoes = 1001
     resultados = []
     tempos = []
 
@@ -533,8 +451,3 @@ if __name__ == '__main__':
 
     escreve_resultado(pasta, entrada, media_resultados, melhor_resultado, pior_resultado, desvio_padrao, media_tempo)
     
-    # print('CUSTO MEDIO: ' + str(media_resultados))
-    # print('MELHOR: ' + str(melhor_resultado))
-    # print('PIOR: ' + str(pior_resultado))
-    # print('DESVIO PADRAO: ' + str(desvio_padrao))
-    # print('TEMPO MEDIO (s): ' + str(media_tempo))
